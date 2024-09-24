@@ -1,16 +1,30 @@
 package pe.edu.cibertec.patitas_frontend.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
+import pe.edu.cibertec.patitas_frontend.dto.LoginRequestDTO;
+import pe.edu.cibertec.patitas_frontend.dto.LoginResponseDTO;
 import pe.edu.cibertec.patitas_frontend.viewModel.LoginModel;
 
 @Controller
 @RequestMapping("/login")
 public class LoginController {
+
+    //NUEVO....
+    @Autowired
+    private RestTemplate restTemplate;
+    //
+    private final String backendURL = "http://localhost:8081/autenticacion/login";
+
 
     //Metodo para mostrar la pantalla de inicio
     @GetMapping("/inicio")
@@ -38,11 +52,36 @@ public class LoginController {
             return "inicioPage";
         }
 
+        //Invocacion API
+        LoginRequestDTO loginRequestDTO = new LoginRequestDTO(tipoDocumento, numeroDocumento, password);
+        //Realizar la solicitud al back
+        try {
+            ResponseEntity<LoginResponseDTO> response = restTemplate.exchange(backendURL, HttpMethod.POST, new HttpEntity<>(loginRequestDTO), LoginResponseDTO.class);
+            LoginResponseDTO loginResponseDTO = response.getBody();
+
+            //Verificar la respuesta
+            if(loginResponseDTO != null && "00".equals(loginResponseDTO.code())){
+                LoginModel loginModel = new LoginModel("00", "", loginResponseDTO.user());
+                model.addAttribute("loginModel", loginModel);
+                return "principal";
+            }else{
+                LoginModel loginModel = new LoginModel("01", loginResponseDTO != null ?loginResponseDTO.msj() : "Error", "");
+                model.addAttribute("loginModel", loginModel);
+                return "inicioPage";
+            }
+
+        }catch (Exception e){
+            LoginModel loginModel = new LoginModel("99", "ERROR: No se pudo conectar con el servidor", "");
+            model.addAttribute("loginModel", loginModel);
+            return "inicioPage";
+        }
+
+
         //Instanciamos el viewModel
-        LoginModel loginModel = new LoginModel("00", "", "Gabriel Hinostroza");
+        //LoginModel loginModel = new LoginModel("00", "", "Gabriel Hinostroza");
         //                     VARIABLE               VALOR
-        model.addAttribute("loginModel", loginModel);
+        //model.addAttribute("loginModel", loginModel);
         //
-        return "principal";
+        //return "principal";
     }
 }
