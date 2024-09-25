@@ -52,8 +52,8 @@ public class LoginController {
             return "inicioPage";
         }
 
-        //Invocacion API
-        LoginRequestDTO loginRequestDTO = new LoginRequestDTO(tipoDocumento, numeroDocumento, password);
+        //Invocacion API Primer Forma:
+        /*LoginRequestDTO loginRequestDTO = new LoginRequestDTO(tipoDocumento, numeroDocumento, password);
         //Realizar la solicitud al back
         try {
             ResponseEntity<LoginResponseDTO> response = restTemplate.exchange(backendURL, HttpMethod.POST, new HttpEntity<>(loginRequestDTO), LoginResponseDTO.class);
@@ -74,14 +74,30 @@ public class LoginController {
             LoginModel loginModel = new LoginModel("99", "ERROR: No se pudo conectar con el servidor", "");
             model.addAttribute("loginModel", loginModel);
             return "inicioPage";
+        }*/
+
+        //Invocacion API Segunda Forma:
+        try {
+            LoginRequestDTO loginRequestDTO = new LoginRequestDTO(tipoDocumento, numeroDocumento, password);
+            LoginResponseDTO loginResponseDTO = restTemplate.postForObject(backendURL, loginRequestDTO, LoginResponseDTO.class);
+
+            if (loginResponseDTO.code().equals("00")) {
+                //Instanciamos el viewModel
+                LoginModel loginModel = new LoginModel("00", "", loginResponseDTO.user());
+                //                     VARIABLE               VALOR
+                model.addAttribute("loginModel", loginModel);
+                //
+                return "principal";
+            } else {
+                LoginModel loginModel = new LoginModel("02", "ERROR: Autenticacion Fallida", "");
+                model.addAttribute("loginModel", loginModel);
+                return "inicioPage";
+            }
+        }catch (Exception e){
+            LoginModel loginModel = new LoginModel("99", "ERROR: No se pudo conectar con el servidor", "");
+            model.addAttribute("loginModel", loginModel);
+            System.out.println(e.getMessage());
+            return "inicioPage";
         }
-
-
-        //Instanciamos el viewModel
-        //LoginModel loginModel = new LoginModel("00", "", "Gabriel Hinostroza");
-        //                     VARIABLE               VALOR
-        //model.addAttribute("loginModel", loginModel);
-        //
-        //return "principal";
     }
 }
