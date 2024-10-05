@@ -21,10 +21,7 @@ public class LoginController {
 
     //NUEVO....
     @Autowired
-    private RestTemplate restTemplate;
-    //
-    private final String backendURL = "http://localhost:8081/autenticacion/login";
-
+    RestTemplate restTemplateAutenticacion;
 
     //Metodo para mostrar la pantalla de inicio
     @GetMapping("/inicio")
@@ -79,7 +76,7 @@ public class LoginController {
         //Invocacion API Segunda Forma:
         try {
             LoginRequestDTO loginRequestDTO = new LoginRequestDTO(tipoDocumento, numeroDocumento, password);
-            LoginResponseDTO loginResponseDTO = restTemplate.postForObject(backendURL, loginRequestDTO, LoginResponseDTO.class);
+            LoginResponseDTO loginResponseDTO = restTemplateAutenticacion.postForObject("/login", loginRequestDTO, LoginResponseDTO.class);
 
             if (loginResponseDTO.code().equals("00")) {
                 //Instanciamos el viewModel

@@ -12,10 +12,11 @@ public class RestTemplateConfig {
 
     //Creamos el Bean para RestTemplate
     @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+    public RestTemplate restTemplateAutenticacion(RestTemplateBuilder builder) {
         //Usar el Builder tiene muchos beneficios como declarar un tiempo de respuestas maximo (Para probar este ejemplo dormimos el back para q funcione)
         return builder
-                .setReadTimeout(Duration.ofSeconds(30))
+                .rootUri("http://localhost:8081/autenticacion")
+                .setReadTimeout(Duration.ofSeconds(30)) //Tiempo de espera maximo para recibir la respuesta
                 .build();
     }
 }
